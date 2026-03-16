@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - Input Nama Tamu</title>
+    
+    <meta property="og:title" content="Undangan Pernikahan Umair & Atin">
+    <meta property="og:description" content="Dengan ridho Allah SWT, kami mengundang Anda dalam pernikahan kami">
+    <meta property="og:image" content="gambar.jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:url" content="https://umair-atin.vercel.app/">
+    <meta property="og:type" content="website">
+    <meta name="twitter:card" content="summary_large_image">
+
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:wght@700&display=swap');
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #E8E2D6;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .container {
+            background-color: #FCF9F3;
+            padding: 30px;
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            border: 1px solid #C9A96E;
+        }
+
+        h1 {
+            color: #2C5530;
+            text-align: center;
+            margin-bottom: 25px;
+            font-family: 'Playfair Display', serif;
+            font-size: 1.8rem;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: #1A3A1E;
+        }
+
+        textarea {
+            width: 100%;
+            height: 200px;
+            padding: 15px;
+            border: 1px solid #E8D5B7;
+            background-color: #fff;
+            box-sizing: border-box;
+            font-size: 1rem;
+            line-height: 1.6;
+            resize: vertical;
+            outline: none;
+        }
+
+        textarea:focus {
+            border-color: #2C5530;
+            box-shadow: 0 0 0 2px rgba(44, 85, 48, 0.1);
+        }
+
+        button#generateButton {
+            width: 100%;
+            padding: 12px 20px;
+            border: none;
+            background-color: #2C5530;
+            color: white;
+            font-size: 1rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        button#generateButton:hover {
+            background-color: #1A3A1E;
+        }
+
+        #resultsList {
+            margin-top: 30px;
+            border-top: 2px double #E8D5B7;
+            padding-top: 20px;
+        }
+
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            border: 1px solid #E8D5B7;
+            background-color: #fff;
+            margin-bottom: 12px;
+        }
+
+        .result-item-text {
+            flex-grow: 1;
+            margin-right: 15px;
+            overflow: hidden;
+        }
+
+        .result-item-text p {
+            margin: 0;
+            font-size: 0.8rem;
+            color: #6C757D;
+            white-space: nowrap;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+        .result-item-text strong {
+            font-size: 1rem;
+            color: #1A3A1E;
+            display: block;
+            margin-bottom: 5px;
+        }
+
+        .copy-btn {
+            padding: 8px 16px;
+            border: 1px solid #C9A96E;
+            background-color: transparent;
+            color: #C9A96E;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.3s;
+            white-space: nowrap;
+        }
+
+        .copy-btn:hover {
+            background-color: #C9A96E;
+            color: white;
+        }
+
+        .copy-btn.success {
+            background-color: #2C5530;
+            border-color: #2C5530;
+            color: white;
+        }
+
+        .instruction {
+            font-size: 0.75rem;
+            color: #6C757D;
+            margin-top: 5px;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Manajemen Tamu</h1>
+        
+        <div class="form-group">
+            <label for="guestListInput">Daftar Nama Tamu:</label>
+            <textarea id="guestListInput" placeholder="Contoh:
+Bapak Ahmad & Keluarga
+Fulan bin Fulan
+Muzanni
+Dst."></textarea>
+            <p class="instruction">*Masukkan satu nama per baris</p>
+        </div>
+
+        <button id="generateButton">Hasilkan Link & Pesan</button>
+
+        <div id="resultsList"></div>
+    </div>
+
+    <script>
+        // --- KONFIGURASI TEMPLATE ---
+        // Ganti URL ini dengan URL tempat Anda meng-host Halaman Utama nantinya
+        const LINK_DASAR = "https://umair-atin.vercel.app/"; 
+        const NAMA_PRIA = "Mus'ab Umair";
+        const NAMA_WANITA = "Rahma Zuhriatin";
+        const TANGGAL_ACARA = "Kamis, 26 Maret 2026";
+
+        const generateButton = document.getElementById('generateButton');
+        const guestListInput = document.getElementById('guestListInput');
+        const resultsList = document.getElementById('resultsList');
+
+        function generateLinks() {
+            const rawText = guestListInput.value.trim();
+            if (!rawText) {
+                alert("Silakan masukkan nama tamu terlebih dahulu.");
+                return;
+            }
+
+            // Pecah teks berdasarkan baris dan bersihkan baris kosong
+            const names = rawText.split('\n').map(n => n.trim()).filter(n => n !== "");
+            
+            resultsList.innerHTML = ""; // Bersihkan hasil sebelumnya
+
+            names.forEach(name => {
+                const encodedName = encodeURIComponent(name);
+                const fullLink = `${LINK_DASAR}?to=${encodedName}`;
+
+                // Template Pesan WhatsApp
+                const waMessage = `*Assalamu'alaikum Warahmatullah Wabarakatuh*
+
+Yth. *${name}*
+_(Mohon maaf bila ada kekeliruan penulisan nama/gelar)_
+
+Tanpa mengurangi rasa hormat, perkenankan kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
+
+*${NAMA_PRIA}* & *${NAMA_WANITA}*
+
+Detail informasi mengenai acara dapat diakses melalui link undangan digital berikut:
+
+${fullLink}
+
+Merupakan suatu kebahagiaan bagi kami apabila Bapak/Ibu/Saudara/i berkenan hadir dan memberikan doa restu.
+
+*Wassalamu'alaikum Warahmatullahi Wabarakatuh*`;
+
+                // Buat Elemen UI
+                const itemDiv = document.createElement('div');
+                itemDiv.className = 'result-item';
+
+                const textDiv = document.createElement('div');
+                textDiv.className = 'result-item-text';
+                textDiv.innerHTML = `<strong>${name}</strong><p>${fullLink}</p>`;
+
+                const copyBtn = document.createElement('button');
+                copyBtn.className = 'copy-btn';
+                copyBtn.textContent = 'SALIN PESAN';
+                
+                copyBtn.onclick = function() {
+                    copyToClipboard(waMessage, copyBtn);
+                };
+
+                itemDiv.appendChild(textDiv);
+                itemDiv.appendChild(copyBtn);
+                resultsList.appendChild(itemDiv);
+            });
+        }
+
+        function copyToClipboard(text, btn) {
+            navigator.clipboard.writeText(text).then(() => {
+                const originalText = btn.textContent;
+                btn.textContent = "TERSALIN!";
+                btn.classList.add('success');
+                setTimeout(() => {
+                    btn.textContent = originalText;
+                    btn.classList.remove('success');
+                }, 2000);
+            }).catch(err => {
+                alert("Gagal menyalin teks.");
+            });
+        }
+
+        generateButton.addEventListener('click', generateLinks);
+    </script>
+
+</body>
+</html>
+
+
